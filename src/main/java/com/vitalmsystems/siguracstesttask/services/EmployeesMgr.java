@@ -2,7 +2,6 @@ package com.vitalmsystems.siguracstesttask.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -26,7 +25,7 @@ public class EmployeesMgr {
 
   private AtomicBoolean enabled = new AtomicBoolean(true);
 
-  @Scheduled(fixedRate = 10)
+//  @Scheduled(fixedRate = 1000)
   public void reportCurrentTime() {
     if (currentDate.isBefore(dateEnd)) {
 //      log.info("CurrentDate {} - HireDate {}", currentDate, between(currentDate, dateEnd));
