@@ -11,7 +11,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
-class EmployeesMgrTest {
+class VirtualTimeGeneratorTest {
 
     @Autowired
     private ApplicationContext context;
@@ -22,16 +22,16 @@ class EmployeesMgrTest {
     }
 
     @Test
-    public void stopEmployeeMgrScheduling() throws Exception {
+    public void stopGeneratingVirtualTime() throws Exception {
         ScheduledAnnotationBeanPostProcessor bean = context.getBean(ScheduledAnnotationBeanPostProcessor.class);
-        EmployeesMgr schedulerBean = context.getBean(EmployeesMgr.class);
+        VirtualTimeGenerator schedulerBean = context.getBean(VirtualTimeGenerator.class);
 
-        await().untilAsserted(() -> {
+        await().atMost(20, SECONDS).untilAsserted(() -> {
             System.err.println("Checking");
             Assertions.assertEquals(false, schedulerBean.getEnabled().get());
         });
 
-        bean.postProcessBeforeDestruction(schedulerBean, "EmployeesMgr");
+        bean.postProcessBeforeDestruction(schedulerBean, "VirtualTimeGenerator");
 
         await().atLeast(3, SECONDS);
 
