@@ -7,6 +7,7 @@ import com.vitalmsystems.siguracstesttask.repositories.EmployeeRepository;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -48,12 +49,12 @@ public class EmployeesMgr {
 
     if (dayCounter.getAndIncrement() % firingRatio == 0) {
       System.err.println("---------------------------Firing a few employees at dayCount: " + (dayCounter.get() - 1));
-      fireSomeEmployees();
+      fireSomeEmployees(currentDate);
     }
 
   }
 
-  private void fireSomeEmployees() {
+  private void fireSomeEmployees(LocalDate currentDate) {
     int numberEmployeesToFire = ThreadLocalRandom.current().nextInt(1, 4);
     System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! " + numberEmployeesToFire);
 
@@ -65,17 +66,29 @@ public class EmployeesMgr {
         employeeToFire.setFiredTime(LocalDate.now());
         employeeRepository.save(employeeToFire);
         byFiredDateIsNull.remove(employeeToFire);
+
+        generateFiringLogMessage(employeeToFire, currentDate);
       }
     }
-
   }
 
-  private void generateHiringLogMessage(Employee employee, LocalDate currentDate) {
-    LocalDate hireTime = employee.getHireTime();
-    String departmentName = employee.getDepartment().getName();
+  private void generateFiringLogMessage(Employee employeeToFire, LocalDate currentDate) {
+    LocalDate firedTime = employeeToFire.getFiredTime();
+    LocalDate hireTime = employeeToFire.getHireTime();
+    String departmentName = employeeToFire.getDepartment().getName();
+    long daysWorked = ChronoUnit.DAYS.between(hireTime, firedTime);
+
+    String message = String.format("%s. Сотрудник %d уволен %s. Отдел: %s. Проработал: %d дней.",
+        currentDate, employeeToFire.getId(), firedTime, departmentName, daysWorked);
+    System.err.println(message);
+  }
+
+  private void generateHiringLogMessage(Employee employeeToHire, LocalDate currentDate) {
+    LocalDate hireTime = employeeToHire.getHireTime();
+    String departmentName = employeeToHire.getDepartment().getName();
 
     String message = String.format("%s. Сотрудник %d нанят %s. Отдел: %s.",
-        currentDate, employee.getId(), hireTime, departmentName);
+        currentDate, employeeToHire.getId(), hireTime, departmentName);
     System.err.println(message);
   }
 
