@@ -1,20 +1,19 @@
 package com.vitalmsystems.siguracstesttask.bootstrap;
 
 import com.vitalmsystems.siguracstesttask.model.Department;
-import com.vitalmsystems.siguracstesttask.model.Employee;
-import com.vitalmsystems.siguracstesttask.model.Guest;
 import com.vitalmsystems.siguracstesttask.repositories.DepartmentRepository;
 import com.vitalmsystems.siguracstesttask.repositories.EmployeeRepository;
 import com.vitalmsystems.siguracstesttask.repositories.GuestRepository;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
+@Order(value = 1)
 public class LoadDataOnStartup implements CommandLineRunner {
 
   private final DepartmentRepository departmentRepository;
@@ -49,13 +48,16 @@ public class LoadDataOnStartup implements CommandLineRunner {
         .map(Department::new)
         .collect(Collectors.toList());
 
-    Employee employee = new Employee(LocalDate.now(), null, departments.get(5), null);
-    Guest guest = new Guest(employee, LocalDate.now().plusWeeks(2));
-    guest.setCard(new byte[]{'a', '?', Byte.MAX_VALUE});
-    employee.setGuest(guest);
-    departments.get(3).getEmployees().add(employee);
-//    guestRepository.save(guest);
     departmentRepository.saveAll(departments);
+    System.out.println("done");
+
+
+//    Employee employee = new Employee(LocalDate.now(), null, departments.get(5), null);
+//    Guest guest = new Guest(employee, LocalDate.now().plusWeeks(2));
+//    guest.setCard(new byte[]{'a', '?', Byte.MAX_VALUE});
+//    employee.setGuest(guest);
+//    departments.get(3).getEmployees().add(employee);
+//    guestRepository.save(guest);
 //    Iterable<Employee> employees = employeeRepository.findAll();
 //    employees.forEach(e -> System.err.println(e.getGuest()));
 
