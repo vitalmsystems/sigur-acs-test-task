@@ -37,12 +37,24 @@ public class EmployeesMgr {
     Employee employee = new Employee(hireTime, null, department, null);
     department.getEmployees().add(employee);
 
-    guestsMgr.createOrNotGuest(employee);
+    Employee savedEmployee = guestsMgr.createOrNotGuest(employee, currentDate);
+    generateHiringLogMessage(savedEmployee, currentDate);
+//    System.err.println(savedEmployee);
 
-    departmentRepository.save(department);
+//    departmentRepository.save(department);
 //    departmentRepository.findById(5L).ifPresent(d -> System.out.println(d.getEmployees()));
 
   }
+
+  private void generateHiringLogMessage(Employee employee, LocalDate currentDate) {
+    LocalDate hireTime = employee.getHireTime();
+    String departmentName = employee.getDepartment().getName();
+
+    String message = String.format("%s. Сотрудник %d нанят %s. Отдел: %s.",
+        currentDate, employee.getId(), hireTime, departmentName);
+    System.err.println(message);
+  }
+
 
   private static LocalDate between(LocalDate startInclusive, LocalDate endExclusive) {
     long startEpochDay = startInclusive.toEpochDay();
