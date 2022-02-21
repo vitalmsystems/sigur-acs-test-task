@@ -8,7 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class EmployeesMgr {
@@ -16,6 +18,9 @@ public class EmployeesMgr {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final GuestsMgr guestsMgr;
+
+  private final static AtomicInteger dayCounter = new AtomicInteger(1);
+  private final static int firingRatio = 5;
 
   public EmployeesMgr(DepartmentRepository departmentRepository,
                       EmployeeRepository employeeRepository,
@@ -39,10 +44,29 @@ public class EmployeesMgr {
 
     Employee savedEmployee = guestsMgr.createOrNotGuest(employee, currentDate);
     generateHiringLogMessage(savedEmployee, currentDate);
-//    System.err.println(savedEmployee);
 
-//    departmentRepository.save(department);
-//    departmentRepository.findById(5L).ifPresent(d -> System.out.println(d.getEmployees()));
+
+    if (dayCounter.getAndIncrement() % firingRatio == 0) {
+      System.err.println("---------------------------Firing a few employees at dayCount: " + (dayCounter.get() - 1));
+      fireSomeEmployees();
+    }
+
+  }
+
+  private void fireSomeEmployees() {
+    int numberEmployeesToFire = ThreadLocalRandom.current().nextInt(1, 4);
+    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! " + numberEmployeesToFire);
+
+    List<Employee> byFiredDateIsNull = employeeRepository.findByFiredTimeIsNull();
+    for (int i = 0; i < numberEmployeesToFire; i++) {
+      Employee employeeToFire = byFiredDateIsNull.get(ThreadLocalRandom.current().nextInt(byFiredDateIsNull.size()));
+
+      if (employeeToFire != null) {
+        employeeToFire.setFiredTime(LocalDate.now());
+        employeeRepository.save(employeeToFire);
+        byFiredDateIsNull.remove(employeeToFire);
+      }
+    }
 
   }
 
