@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class VirtualTimeGenerator {
 
   private static final Logger log = LoggerFactory.getLogger(VirtualTimeGenerator.class);
-//  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
   private final EmployeesMgr employeesMgr;
   private final PassEmulator passEmulator;
@@ -36,12 +35,9 @@ public class VirtualTimeGenerator {
 
   private AtomicBoolean enabled = new AtomicBoolean(true);
 
-  @Scheduled(fixedRate = 100)
+  @Scheduled(fixedRate = 1000)
   public void newDayHasCome() {
     if (currentDate.isBefore(dateEnd)) {
-//      log.info("CurrentDate {} - HireDate {}", currentDate, between(currentDate, dateEnd));
-//      String message = String.format("CurrentDate %s - HireDate %s", currentDate, between(currentDate, dateEnd));
-//      System.out.println(message);
       employeesMgr.generateNewEmployee(currentDate, dateEnd);
 
       passEmulator.helloNewDay(currentDate);
@@ -52,6 +48,4 @@ public class VirtualTimeGenerator {
       enabled.set(false);
     }
   }
-
-
 }

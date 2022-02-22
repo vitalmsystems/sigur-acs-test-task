@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Component
@@ -56,11 +57,7 @@ public class GuestsMgr {
     String message = String.format("Гостю %d назначена встреча сотруднику %d. " +
             "Отдел: %s. Дата: %s. До встречи осталось: %d дней.",
         guest.getId(), employee.getId(), departmentName, visitDate, daysBeforeVisit);
-    System.err.println(message);
-  }
-
-  public void checkIfVisitIsValid(Employee employee, LocalDate currentDate) {
-
+    System.out.println(message);
   }
 
   private static LocalDate notLaterSixMonths(LocalDate startInclusive) {
@@ -71,5 +68,19 @@ public class GuestsMgr {
         .nextLong(startEpochDay, endEpochDay);
 
     return LocalDate.ofEpochDay(randomDay);
+  }
+
+  public void cancelVisitsOfFiredEmployees(List<Employee> firedEmployees) {
+    firedEmployees.forEach(emp -> {
+      if (emp.getGuest() != null) {
+        Guest guest = emp.getGuest();
+        String departmentName = emp.getDepartment().getName();
+        LocalDate visitDate = guest.getVisitDate();
+        LocalDate firedTime = emp.getFiredTime();
+        String message = String.format("Встреча гостя %d с сотрудником %d отменена. Отдел: %s. Дата встречи: %s" +
+            ", дата увольнения сотрудника: %s", guest.getId(), emp.getId(), departmentName, visitDate, firedTime);
+        System.err.println(message);
+      }
+    });
   }
 }

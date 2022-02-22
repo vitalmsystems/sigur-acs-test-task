@@ -35,7 +35,8 @@ public class EmployeesMgr {
   }
 
   public void generateNewEmployee(LocalDate currentDate, LocalDate endDate) {
-    System.out.println("И пришёл новый день: " + currentDate);
+    String msg = String.format("%n-------- И пришёл новый виртуальный день: %s --------------", currentDate);
+    System.out.println(msg);
     Iterable<Department> departmentsIterable = departmentRepository.findAll();
     ArrayList<Department> departments = new ArrayList<>();
     departmentsIterable.iterator().forEachRemaining(departments::add);
@@ -60,18 +61,25 @@ public class EmployeesMgr {
   private void fireSomeEmployees(LocalDate currentDate) {
     int numberEmployeesToFire = ThreadLocalRandom.current().nextInt(1, 4);
 
+    List<Employee> firedEmployees = new ArrayList<>();
+
     List<Employee> byFiredDateIsNull = employeeRepository.findByFiredTimeIsNull();
     for (int i = 0; i < numberEmployeesToFire; i++) {
       Employee employeeToFire = byFiredDateIsNull.get(ThreadLocalRandom.current().nextInt(byFiredDateIsNull.size()));
 
       if (employeeToFire != null) {
-        employeeToFire.setFiredTime(LocalDate.now());
+        LocalDate firedDate = employeeToFire.getHireTime().plusDays(ThreadLocalRandom.current().nextInt(200));
+        employeeToFire.setFiredTime(firedDate);
         employeeRepository.save(employeeToFire);
         byFiredDateIsNull.remove(employeeToFire);
+
+        firedEmployees.add(employeeToFire);
 
         generateFiringLogMessage(employeeToFire, currentDate);
       }
     }
+
+    guestsMgr.cancelVisitsOfFiredEmployees(firedEmployees);
   }
 
   private void generateFiringLogMessage(Employee employeeToFire, LocalDate currentDate) {
@@ -91,7 +99,7 @@ public class EmployeesMgr {
 
     String message = String.format("%s. Сотрудник %d нанят %s. Отдел: %s.",
         currentDate, employeeToHire.getId(), hireTime, departmentName);
-    System.err.println(message);
+    System.out.println(message);
   }
 
   private static LocalDate between(LocalDate startInclusive, LocalDate endExclusive) {
