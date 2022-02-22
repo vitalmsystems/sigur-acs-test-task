@@ -19,20 +19,23 @@ public class EmployeesMgr {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final GuestsMgr guestsMgr;
+  private final PassEmulator passEmulator;
 
   private final static AtomicInteger dayCounter = new AtomicInteger(1);
   private final static int firingRatio = 5;
 
   public EmployeesMgr(DepartmentRepository departmentRepository,
                       EmployeeRepository employeeRepository,
-                      GuestsMgr guestsMgr) {
+                      GuestsMgr guestsMgr,
+                      PassEmulator passEmulator) {
     this.departmentRepository = departmentRepository;
     this.employeeRepository = employeeRepository;
     this.guestsMgr = guestsMgr;
+    this.passEmulator = passEmulator;
   }
 
   public void generateNewEmployee(LocalDate currentDate, LocalDate endDate) {
-    System.out.println("new day has come: " + currentDate);
+    System.out.println("И пришёл новый день: " + currentDate);
     Iterable<Department> departmentsIterable = departmentRepository.findAll();
     ArrayList<Department> departments = new ArrayList<>();
     departmentsIterable.iterator().forEachRemaining(departments::add);
@@ -41,22 +44,21 @@ public class EmployeesMgr {
     Department department = departments.get(departmentRandomIndex);
     LocalDate hireTime = between(currentDate, endDate);
     Employee employee = new Employee(hireTime, null, department, null);
+    byte[] card = passEmulator.generateCardCode();
+    employee.setCard(card);
     department.getEmployees().add(employee);
 
     Employee savedEmployee = guestsMgr.createOrNotGuest(employee, currentDate);
+
     generateHiringLogMessage(savedEmployee, currentDate);
 
-
     if (dayCounter.getAndIncrement() % firingRatio == 0) {
-      System.err.println("---------------------------Firing a few employees at dayCount: " + (dayCounter.get() - 1));
       fireSomeEmployees(currentDate);
     }
-
   }
 
   private void fireSomeEmployees(LocalDate currentDate) {
     int numberEmployeesToFire = ThreadLocalRandom.current().nextInt(1, 4);
-    System.out.println("!!!!!!!!!!!!!!!!!!!!!!!! " + numberEmployeesToFire);
 
     List<Employee> byFiredDateIsNull = employeeRepository.findByFiredTimeIsNull();
     for (int i = 0; i < numberEmployeesToFire; i++) {
@@ -91,7 +93,6 @@ public class EmployeesMgr {
         currentDate, employeeToHire.getId(), hireTime, departmentName);
     System.err.println(message);
   }
-
 
   private static LocalDate between(LocalDate startInclusive, LocalDate endExclusive) {
     long startEpochDay = startInclusive.toEpochDay();

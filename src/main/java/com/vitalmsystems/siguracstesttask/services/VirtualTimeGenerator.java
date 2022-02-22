@@ -1,6 +1,7 @@
 package com.vitalmsystems.siguracstesttask.services;
 
 import com.vitalmsystems.siguracstesttask.managers.EmployeesMgr;
+import com.vitalmsystems.siguracstesttask.managers.PassEmulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -17,13 +18,16 @@ public class VirtualTimeGenerator {
 //  private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("HH:mm:ss");
 
   private final EmployeesMgr employeesMgr;
+  private final PassEmulator passEmulator;
 
   private LocalDate dateStart = LocalDate.of(2022, Month.JANUARY, 1);
   private LocalDate dateEnd = LocalDate.of(2023, Month.JANUARY, 1);
   private LocalDate currentDate = dateStart;
 
-  public VirtualTimeGenerator(EmployeesMgr employeesMgr) {
+  public VirtualTimeGenerator(EmployeesMgr employeesMgr,
+                              PassEmulator passEmulator) {
     this.employeesMgr = employeesMgr;
+    this.passEmulator = passEmulator;
   }
 
   public AtomicBoolean getEnabled() {
@@ -39,6 +43,9 @@ public class VirtualTimeGenerator {
 //      String message = String.format("CurrentDate %s - HireDate %s", currentDate, between(currentDate, dateEnd));
 //      System.out.println(message);
       employeesMgr.generateNewEmployee(currentDate, dateEnd);
+
+      passEmulator.helloNewDay(currentDate);
+
       currentDate = currentDate.plusDays(1);
     } else {
       log.info("Employee manager finished his work {}", enabled.get());

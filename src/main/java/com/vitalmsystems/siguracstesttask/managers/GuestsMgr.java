@@ -18,20 +18,24 @@ public class GuestsMgr {
   private final DepartmentRepository departmentRepository;
   private final EmployeeRepository employeeRepository;
   private final GuestRepository guestRepository;
+  private final PassEmulator passEmulator;
+  private static final ThreadLocalRandom random = ThreadLocalRandom.current();
 
   public GuestsMgr(DepartmentRepository departmentRepository,
                    EmployeeRepository employeeRepository,
-                   GuestRepository guestRepository) {
+                   GuestRepository guestRepository,
+                   PassEmulator passEmulator) {
     this.departmentRepository = departmentRepository;
     this.employeeRepository = employeeRepository;
     this.guestRepository = guestRepository;
+    this.passEmulator = passEmulator;
   }
 
   public Employee createOrNotGuest(Employee employee, LocalDate currentDate) {
-    ThreadLocalRandom random = ThreadLocalRandom.current();
-
     if (random.nextInt(0, 100) < 50) {
       Guest guest = new Guest(employee, notLaterSixMonths(employee.getHireTime()));
+      byte[] card = passEmulator.generateCardCode();
+      guest.setCard(card);
       employee.setGuest(guest);
     }
 
